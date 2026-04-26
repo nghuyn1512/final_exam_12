@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liên hệ — Trading Zone</title>
+  <link rel="shortcut icon" href="assets/images/tradingview-logo-96x96.png" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue:   #2962ff;
+      --cyan:   #00b0ff;
+      --dark:   #0a0e1a;
+      --card:   #111827;
+      --border: rgba(255,255,255,0.07);
+      --text:   #e2e8f7;
+      --muted:  #7a8aaa;
+      --accent: #69e0ff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: #FFFF;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND MESH ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 0%, rgba(41,98,255,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 90% 100%, rgba(0,176,255,0.14) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(105,224,255,0.05) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── GRID LINES ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(41,98,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(41,98,255,0.05) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      height: 68px;
+      background: rgba(10,14,26,0.75);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+    .nav-logo img { height: 32px; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: #fff; }
+    .nav-cta {
+      padding: 8px 20px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      color: #fff !important;
+      font-weight: 600;
+      font-size: 0.88rem;
+      transition: opacity 0.2s, transform 0.2s !important;
+    }
+    .nav-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    /* ── MAIN WRAPPER ── */
+    main {
+      position: relative;
+      z-index: 1;
+      padding-top: 68px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 90px 24px 60px;
+      animation: fadeUp 0.7s ease both;
+    }
+    .hero-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(41,98,255,0.4);
+      background: rgba(41,98,255,0.1);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .hero-label span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s infinite; }
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 18px;
+    }
+    h1 em {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--blue), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ── CONTACT GRID ── */
+    .contact-grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 100px;
+      display: grid;
+      grid-template-columns: 1fr 1.45fr;
+      gap: 28px;
+      animation: fadeUp 0.7s 0.15s ease both;
+    }
+
+    /* ── INFO COLUMN ── */
+    .info-col { display: flex; flex-direction: column; gap: 16px; }
+
+    .info-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .info-card:hover { border-color: rgba(41,98,255,0.35); transform: translateY(-3px); }
+
+    .info-card .ic-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(41,98,255,0.2), rgba(0,176,255,0.1));
+      border: 1px solid rgba(41,98,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 14px;
+    }
+    .info-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .info-card p, .info-card a {
+      color: var(--text);
+      font-size: 0.97rem;
+      text-decoration: none;
+      line-height: 1.6;
+      transition: color 0.2s;
+    }
+    .info-card a:hover { color: var(--accent); }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: rgba(34,197,94,0.12);
+      border: 1px solid rgba(34,197,94,0.25);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #4ade80;
+    }
+    .status-badge .dot-green {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: pulse 1.5s infinite;
+    }
+
+    /* Social links */
+    .social-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .social-btn {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .social-btn:hover {
+      border-color: rgba(41,98,255,0.4);
+      background: rgba(41,98,255,0.08);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+    .social-btn .sico { font-size: 1.1rem; }
+
+    /* ── FORM COLUMN ── */
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .form-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--blue), var(--cyan), transparent);
+    }
+    .form-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.55rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .form-card .sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 32px;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+    .field label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .field input, .field select, .field textarea {
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.93rem;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      width: 100%;
+    }
+    .field input::placeholder, .field textarea::placeholder { color: rgba(122,138,170,0.5); }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--blue);
+      background: rgba(41,98,255,0.06);
+    }
+    .field select { appearance: none; cursor: pointer; }
+    .field select option { background: #111827; }
+    .field textarea { resize: vertical; min-height: 120px; }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border: none;
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+      margin-top: 8px;
+      box-shadow: 0 4px 20px rgba(41,98,255,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .submit-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(255,255,255,0.12), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.4s;
+    }
+    .submit-btn:hover::after { transform: translateX(100%); }
+    .submit-btn:hover { opacity: 0.92; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(41,98,255,0.4); }
+    .submit-btn:active { transform: translateY(0); }
+
+    /* Success state */
+    .success-msg {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+      animation: fadeUp 0.4s ease;
+    }
+    .success-msg .checkmark {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05));
+      border: 2px solid rgba(34,197,94,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      margin: 0 auto 20px;
+    }
+    .success-msg h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .success-msg p { color: var(--muted); font-size: 0.92rem; }
+
+    /* ── MAP ── */
+    .map-section {
+      max-width: 1100px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+      animation: fadeUp 0.7s 0.3s ease both;
+    }
+    .map-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .map-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .map-header span { color: var(--muted); font-size: 0.88rem; }
+    .map-wrapper {
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      height: 360px;
+    }
+    .map-wrapper iframe { width: 100%; height: 100%; border: none; display: block; }
+
+    /* ── FAQ STRIP ── */
+    .faq-section {
+      max-width: 1100px;
+      margin: 0 auto 100px;
+      padding: 0 24px;
+      animation: fadeUp 0.7s 0.4s ease both;
+    }
+    .faq-section h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+    .faq-list { display: flex; flex-direction: column; gap: 10px; }
+    .faq-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .faq-q {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      gap: 12px;
+      transition: color 0.2s;
+    }
+    .faq-q:hover { color: var(--accent); }
+    .faq-icon {
+      font-size: 1.2rem;
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: transform 0.3s;
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); color: var(--accent); }
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.25s;
+      padding: 0 22px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+    .faq-item.open .faq-a { max-height: 200px; padding: 0 22px 18px; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 30px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.85rem;
+      position: relative;
+      z-index: 1;
+    }
+    footer a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    footer a:hover { color: #fff; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.4; }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .form-card { padding: 28px 22px; }
+      footer { flex-direction: column; gap: 10px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="index.html">
+    <img src="assets/images/tradingview-logo-96x96.png" alt="Trading Zone">
+    Trading Zone
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Trang chủ</a></li>
+    <li><a href="https://vn.tradingview.com/markets/">Thị trường</a></li>
+    <li><a href="contact.html" class="active">Liên hệ</a></li>
+    <li><a href="https://vn.tradingview.com/pricing/?source=header_go_pro_button&feature=start_free_trial" target="_blank" class="nav-cta">Bắt đầu</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-label"><span></span> Luôn sẵn sàng hỗ trợ</div>
+    <h1>Hãy <em>kết nối</em><br>với chúng tôi</h1>
+    <p>Đội ngũ Trading Zone luôn ở đây để giải đáp mọi thắc mắc về giao dịch, đầu tư và nền tảng.</p>
+  </section>
+
+  <!-- CONTACT GRID -->
+  <div class="contact-grid">
+
+    <!-- INFO COLUMN -->
+    <div class="info-col">
+
+      <div class="info-card">
+        <div class="ic-icon">📞</div>
+        <h3>Điện thoại</h3>
+        <a href="tel:0987654321" style="font-size:1.15rem;font-weight:600;">0987 654 321</a>
+        <br>
+        <div class="status-badge"><span class="dot-green"></span> Đang hoạt động · 24/5</div>
+      </div>
+
+      <div class="info-card">
+        <div class="ic-icon">✉️</div>
+        <h3>Email</h3>
+        <a href="mailto:minhdang2238@gmail.com">minhdang2238@gmail.com</a>
+        <p style="color:var(--muted);font-size:0.83rem;margin-top:6px;">Phản hồi trong vòng 2 giờ làm việc</p>
+      </div>
+
+      <div class="info-card">
+        <div class="ic-icon">📍</div>
+        <h3>Địa chỉ</h3>
+        <p>89 Nguyễn Đình Thi,<br>Tây Hồ, Hà Nội</p>
+      </div>
+
+      <div class="info-card">
+        <div class="ic-icon">🌐</div>
+        <h3>Mạng xã hội</h3>
+        <div class="social-grid">
+          <a class="social-btn" href="https://facebook.com" target="_blank"><span class="sico">📘</span> Facebook</a>
+          <a class="social-btn" href="https://twitter.com" target="_blank"><span class="sico">🐦</span> Twitter</a>
+          <a class="social-btn" href="https://instagram.com" target="_blank"><span class="sico">📸</span> Instagram</a>
+          <a class="social-btn" href="https://tiktok.com" target="_blank"><span class="sico">🎵</span> TikTok</a>
+          <a class="social-btn" href="https://youtube.com" target="_blank"><span class="sico">▶️</span> YouTube</a>
+          <a class="social-btn" href="https://t.me" target="_blank"><span class="sico">✈️</span> Telegram</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FORM COLUMN -->
+    <div class="form-card" id="contactCard">
+      <h2>Gửi tin nhắn 💬</h2>
+      <p class="sub">Điền form bên dưới, chúng tôi sẽ liên hệ lại sớm nhất có thể.</p>
+
+      <div id="contactForm">
+        <div class="form-row">
+          <div class="field">
+            <label>Họ và tên *</label>
+            <input type="text" id="f-name" placeholder="Nguyễn Văn A" required>
+          </div>
+          <div class="field">
+            <label>Số điện thoại</label>
+            <input type="tel" id="f-phone" placeholder="09xx xxx xxx">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Email *</label>
+          <input type="email" id="f-email" placeholder="email@example.com" required>
+        </div>
+
+        <div class="field">
+          <label>Chủ đề</label>
+          <select id="f-subject">
+            <option value="" disabled selected>Chọn chủ đề...</option>
+            <option>💼 Tư vấn đầu tư</option>
+            <option>📈 Phân tích kỹ thuật</option>
+            <option>🔑 Hỗ trợ tài khoản</option>
+            <option>💡 Hợp tác kinh doanh</option>
+            <option>❓ Khác</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Nội dung *</label>
+          <textarea id="f-msg" placeholder="Mô tả câu hỏi hoặc yêu cầu của bạn..."></textarea>
+        </div>
+
+        <button class="submit-btn" onclick="submitForm()">
+          Gửi tin nhắn &nbsp;→
+        </button>
+      </div>
+
+      <div class="success-msg" id="successMsg">
+        <div class="checkmark">✅</div>
+        <h3>Gửi thành công!</h3>
+        <p>Cảm ơn bạn đã liên hệ. Đội ngũ Trading Zone<br>sẽ phản hồi trong thời gian sớm nhất nhé!</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MAP -->
+  <div class="map-section">
+    <div class="map-header">
+      <h2>📍 Tìm chúng tôi trên bản đồ</h2>
+      <span>89 Nguyễn Đình Thi, Tây Hồ, Hà Nội</span>
+    </div>
+    <div class="map-wrapper">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d5266.166874759364!2d105.82236176340318!3d21.044640307946867!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1776573404537!5m2!1sen!2sus"
+        allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq-section">
+    <h2>Câu hỏi thường gặp</h2>
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Trading Zone có hỗ trợ người mới bắt đầu không?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          Có! Chúng tôi cung cấp đầy đủ tài liệu, biểu đồ trực quan và cộng đồng nhà đầu tư để bạn học hỏi từng bước. Đội ngũ hỗ trợ luôn sẵn sàng giải đáp mọi thắc mắc.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Tôi có thể giao dịch Bitcoin và crypto trên nền tảng không?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          Chúng tôi cung cấp biểu đồ và phân tích kỹ thuật cho BTC, ETH, XRP và hàng trăm đồng coin khác thông qua TradingView. Bạn có thể theo dõi giá và phân tích chuyên sâu.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Giờ làm việc của bộ phận hỗ trợ là khi nào?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          Chúng tôi hoạt động 24/5 — tức là từ thứ Hai đến thứ Sáu, cả ngày lẫn đêm, theo đúng giờ thị trường tài chính toàn cầu.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Tôi cần chuẩn bị gì trước khi liên hệ tư vấn?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          Hãy chuẩn bị thông tin về mục tiêu đầu tư, vốn dự kiến và những thị trường bạn quan tâm. Điều đó giúp chúng tôi tư vấn chính xác và hiệu quả hơn cho bạn.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <span>© 2025 Trading Zone. All rights reserved.</span>
+  <div style="display:flex;gap:24px;">
+    <a href="index.html">Trang chủ</a>
+    <a href="https://vn.tradingview.com/markets/">Thị trường</a>
+    <a href="contact.html">Liên hệ</a>
+  </div>
+</footer>
+
+<script>
+  function submitForm() {
+    var name  = document.getElementById('f-name').value.trim();
+    var email = document.getElementById('f-email').value.trim();
+    var msg   = document.getElementById('f-msg').value.trim();
+
+    if (!name || !email || !msg) {
+      var fields = [];
+      if (!name)  fields.push('Họ và tên');
+      if (!email) fields.push('Email');
+      if (!msg)   fields.push('Nội dung');
+      alert('Vui lòng điền: ' + fields.join(', '));
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert('Email không hợp lệ!');
+      return;
+    }
+
+    document.getElementById('contactForm').style.display = 'none';
+    var s = document.getElementById('successMsg');
+    s.style.display = 'block';
+  }
+
+  function toggleFaq(btn) {
+    var item = btn.parentElement;
+    var isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(function(el) { el.classList.remove('open'); });
+    if (!isOpen) item.classList.add('open');
+  }
+</script>
+
+</body>
+</html>
